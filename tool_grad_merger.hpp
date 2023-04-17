@@ -35,7 +35,8 @@ namespace grad_merger {
                   const std::vector<double>& width,
                   const std::vector<std::string>& grad_files,
                   const std::vector<std::string>& count_files,
-                  const std::string& output_prefix) {
+            const std::string& output_prefix) {
+
             this->dimension_ = lowerboundary.size();
 
             assert(upperboundary.size() == this->dimension_);
@@ -55,10 +56,11 @@ namespace grad_merger {
                                       width[i]);
             }
 
-            this->count_grid_ = new ndarray::NdArray<int>(this->shape_);
+            count_grid_ = new ndarray::NdArray<int>({ this->shape_ });
+
             for (int i = 0; i < this->dimension_; i++) {
-                this->grad_grid_.push_back(
-                    new ndarray::NdArray<double>(this->shape_));
+                grad_grid_.push_back(
+                    ndarray::NdArray<double>(this->shape_));
             }
 
             for (int i = 0; i < grad_files.size(); i++) {
@@ -69,10 +71,6 @@ namespace grad_merger {
         }
 
         ~GradMerge() {
-            delete this->count_grid_;
-            for (int i = 0; i < this->dimension_; i++) {
-                delete (this->grad_grid_)[i];
-            }
         }
 
        private:
@@ -146,18 +144,18 @@ namespace grad_merger {
                     }
                 }
                 for (int i = 0; i < this->dimension_; i++) {
-                    (*((this->grad_grid_)[i]))[this->RCToInternal(rc_position)] =
+                    (grad_grid_[i])[this->RCToInternal(rc_position)] =
                         (std::stod(grad_splited_line[this->dimension_ + i]) *
                              std::stod(count_splited_line[this->dimension_]) +
-                         (*(this->count_grid_))[this->RCToInternal(
+                         (*count_grid_)[this->RCToInternal(
                              rc_position)] *
-                             (*((this->grad_grid_)[i]))[this->RCToInternal(
+                             (grad_grid_[i])[this->RCToInternal(
                                  rc_position)]) /
                         (std::stod(count_splited_line[this->dimension_]) +
-                         (*(this->count_grid_))[this->RCToInternal(
+                         (*count_grid_)[this->RCToInternal(
                              rc_position)]);
                 }
-                (*(this->count_grid_))[this->RCToInternal(rc_position)] +=
+                (*count_grid_)[this->RCToInternal(rc_position)] +=
                     std::stod(count_splited_line[this->dimension_]);
             }
 
@@ -211,9 +209,9 @@ namespace grad_merger {
                                          coor, common_tools::kDecimalAccuracy)
                                   << " ";
                 }
-                write_count_file << (*(this->count_grid_))[loop_flag] << "\n";
+                write_count_file << (*count_grid_)[loop_flag] << "\n";
                 for (int i = 0; i < this->dimension_; i++) {
-                    write_grad_file << (*((this->grad_grid_)[i]))[loop_flag]
+                    write_grad_file << (grad_grid_[i])[loop_flag]
                                   << " ";
                 }
                 write_grad_file << "\n";
@@ -268,8 +266,8 @@ namespace grad_merger {
         }
 
         // the grid of grad and count
-        std::vector<ndarray::NdArray<double>*> grad_grid_;
-        ndarray::NdArray<int>* count_grid_;
+        std::vector<ndarray::NdArray<double> > grad_grid_;
+        ndarray::NdArray<int> * count_grid_;
         // lowerboundary, upperboundary, width, and dimension
         std::vector<double> lowerboundary_;
         std::vector<double> upperboundary_;

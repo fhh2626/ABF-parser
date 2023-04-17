@@ -91,6 +91,11 @@ namespace ndarray {
             return data_[Position(pos)];
         }
 
+        // operator[] to get the desired item at a given pos
+        const T& operator[](const std::vector<int>& pos) const {
+            return data_[Position(pos)];
+        }
+
         // operator +
         NdArray operator+(const NdArray& arr) const {
             assert(this->shape_ == arr.shape_);
